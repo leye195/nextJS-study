@@ -1,5 +1,3 @@
-const { off } = require("process");
-
 module.exports = {
   env: {
     browser: true,
@@ -24,6 +22,9 @@ module.exports = {
     "@typescript-eslint/quotes": ["error", "double"],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "import/no-unresolved": "off",
     "jsx-a11y/control-has-associated-label": "off",
     "react/no-array-index": "off",
     "comma-dangle": "off",
@@ -38,10 +39,12 @@ module.exports = {
     "operator-linebreak": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-props-no-spreading": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "import/prefer-default-export": "off",
     "jsx-a11y/anchor-is-valid": "off",
     "global-require": "off",
     "jsx-a11y/label-has-associated-control": "off",
-    "import/prefer-default-export": "off",
+
     "no-params-reassign": "off",
     "react/jsx-curly-newline": "off",
     "react/jsx-filename-extension": [

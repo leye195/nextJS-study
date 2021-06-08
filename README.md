@@ -228,7 +228,7 @@ export const getServerSideProps = async ({ query }) => {
   try {
     const { name } = query;
     const { data, status } = await axios.get(
-      `https://api.github.com/users/${name}`,
+      `https://api.github.com/users/${name}`
     );
     if (status === 200) {
       return {
@@ -290,7 +290,7 @@ fallback이 false인 경우 이외의 경로는 404 에러 페이지로 가게�
 export const getStaticProps = async ({ params }) => {
   try {
     const { data, status } = await axios.get(
-      `https://api.github.com/users/${params.name}`,
+      `https://api.github.com/users/${params.name}`
     );
     if (status === 200)
       return { props: { user: data, time: new Date().toISOString() } };
@@ -353,4 +353,108 @@ export default App;
 //로 페이지에 전달해주는 props
 ```
 
-**\_document 파일**
+**\_document (공통 문서)**
+
+일반적으로 html 및 body 태그를 보강하는데 사용, document를 이용해 title, description, meta 등 프로젝트 정보를 제공하는 정보를 제공하는 html 코드를 작성 할 수 있으며 font or 외부 api, cdn등을 불러오도록 할 수 있음
+
+```
+import Document, { Html, Head, Main, NextScript } from "next/document";
+
+class MyDocument extends Document {
+  render() {
+    return (
+      <Html lang="ko">
+        <Head>
+          <meta name="title" content="GitHub Repository" />
+          <meta name="description" content="Leye195 Github Repository List" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap"
+            rel="stylesheet"
+          />
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+
+export default MyDocument;
+```
+
+**\_error (에러페이지)**
+
+next에서는 빌드된 프로덕션 환경에서 에러가 발생할 경우 에러 페이지로 넘어가게 되며 실행 후 에러가 발생할 경우 `An unexpected error has occured` 문구가 있는 화면을 표출함.
+
+존재 하지 않는 페이지로 이동할 경우 404 내용을 페이지에 표출해줌
+
+여러 사이트는 404 및 에러가 발생할 경우를 대비하여 에러페이지를 만들어두곤 함. nextjs에서 제공하는 error 페이지 기능을 활용해 커스텀 에러 페이지를 만들어줄수 있음
+
+커스텀 404 페이지의 경우 `404.jsx` 파일을 만들어주면 됨
+
+```
+const NotFound = () => {
+  return <p>404 Not Found</p>
+}
+
+export default NotFound;
+```
+
+**Styled Coponents SSR 지원 방법**
+
+```
+import Document from 'next/document';
+import {ServerStyleSheet} from 'styled-components';
+
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    const sheet = new ServerStyleSheet();
+		const originalRenderPage = ctx.renderPage;
+
+		try {
+      ctx.renderPage = () =>
+				originalRenderPage({
+					enhanceApp: (App) => (props) =>
+						sheet.collectStyles(<App {...props}/>),
+				});
+      const initialProps = await Document.getInitialProps(ctx);
+			return {
+				...initialProps,
+				styles: (
+					<>
+						{initialProps.styles}
+						{sheet.getStyleElement()}
+					</>
+				)
+			}
+    } finally {
+			sheet.seal();
+    }
+  }
+
+  render() {
+    return (
+			<Html>
+				<Head>
+					...
+				</Head>
+				<body>
+					<Main/>
+					<NextScript/>
+				</body>
+			</Html>
+		)
+  }
+}
+
+export default MyDocument;
+
+//.babelrc
+{
+  "presets": ["next/babel"],
+	"plugins": [["styled-componnts", {"ssr": true}]]
+}
+```

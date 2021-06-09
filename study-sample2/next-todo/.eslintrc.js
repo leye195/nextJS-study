@@ -25,6 +25,7 @@ module.exports = {
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "import/no-unresolved": "off",
+    "no-console": "off",
     "jsx-a11y/control-has-associated-label": "off",
     "react/no-array-index": "off",
     "comma-dangle": "off",
@@ -44,7 +45,6 @@ module.exports = {
     "jsx-a11y/anchor-is-valid": "off",
     "global-require": "off",
     "jsx-a11y/label-has-associated-control": "off",
-
     "no-params-reassign": "off",
     "react/jsx-curly-newline": "off",
     "react/jsx-filename-extension": [

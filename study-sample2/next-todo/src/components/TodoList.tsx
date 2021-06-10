@@ -166,6 +166,16 @@ const TodoList = ({ todos }: Props) => {
     }
   };
 
+  const deleteTodo = (id: number) => async () => {
+    try {
+      await deleteTodo(id);
+
+      setLocalTodos((prev) => prev.filter((todo) => todo.id !== id));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const getTodoColorNums = useCallback(() => {
     let red = 0;
     let orange = 0;
@@ -244,7 +254,7 @@ const TodoList = ({ todos }: Props) => {
                   <>
                     <TrashCanIcon
                       className="todo-trash-can"
-                      onClick={checkTodo(todo.id)}
+                      onClick={deleteTodo(todo.id)}
                     />
                     <CheckMarkIcon
                       className="todo-check-mark"

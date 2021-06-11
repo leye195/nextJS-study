@@ -1,10 +1,10 @@
 import { GetServerSideProps, NextPage } from "next";
-import axios from "axios";
 import styled from "styled-components";
 import { TodoType } from "types/todo";
 import TodoList from "components/TodoList";
-import api from "lib/api";
 import { getTodoAPI } from "lib/api/todo";
+import { RootState, wrapper, useSelector } from "store";
+import { todoActions } from "store/todo";
 
 interface Props {
   todos: TodoType[];
@@ -14,7 +14,8 @@ const Container = styled.div`
   font-weight: bold;
 `;
 
-const index: NextPage<Props> = ({ todos }) => {
+const index: NextPage<Props> = () => {
+  const todos = useSelector((state) => state.todo.todos);
   return (
     <Container>
       <TodoList todos={todos} />
@@ -22,18 +23,22 @@ const index: NextPage<Props> = ({ todos }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    const res = await getTodoAPI();
+export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps(
+  ({ dispatch }) => async (): Promise<any> => {
+    try {
+      const res = await getTodoAPI();
 
-    if (res.status === 200) return { props: { todos: res.data } };
+      if (res.status === 200) {
+        dispatch(todoActions.setToDo(res.data));
+      }
 
-    return {
-      props: { todos: [] },
-    };
-  } catch (e) {
-    return { props: {} };
+      return {
+        props: { todos: [] },
+      };
+    } catch (e) {
+      return { props: {} };
+    }
   }
-};
+);
 
 export default index;

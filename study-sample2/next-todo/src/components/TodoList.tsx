@@ -1,8 +1,10 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import styled from "styled-components";
+import { useDispatch } from "react-redux";
+import { todoActions } from "store/todo";
 import palette from "styles/palette";
 import { TodoType } from "types/todo";
-import { checkTodoAPI } from "lib/api/todo";
+import { checkTodoAPI, deleteTodoAPI } from "lib/api/todo";
 import CheckMarkIcon from "../../public/statics/svg/check_mark.svg";
 import TrashCanIcon from "../../public/statics/svg/trash_can.svg";
 
@@ -149,18 +151,18 @@ type Props = {
 };
 
 const TodoList = ({ todos }: Props) => {
-  const [localTodos, setLocalTodos] = useState<TodoType[]>(todos);
+  const dispatch = useDispatch();
 
   const checkTodo = (id: number) => async () => {
     try {
       await checkTodoAPI(id);
 
-      const newTodos = localTodos.map((todo) => {
+      const newTodos = todos.map((todo) => {
         if (todo.id === id) return { ...todo, checked: !todo.checked };
 
         return todo;
       });
-      setLocalTodos(newTodos);
+      dispatch(todoActions.setToDo(newTodos));
     } catch (err) {
       console.log(err);
     }
@@ -168,9 +170,10 @@ const TodoList = ({ todos }: Props) => {
 
   const deleteTodo = (id: number) => async () => {
     try {
-      await deleteTodo(id);
+      await deleteTodoAPI(id);
 
-      setLocalTodos((prev) => prev.filter((todo) => todo.id !== id));
+      const newTodos = todos.filter((todo) => todo.id !== id);
+      dispatch(todoActions.setToDo(newTodos));
     } catch (err) {
       console.log(err);
     }
@@ -226,7 +229,7 @@ const TodoList = ({ todos }: Props) => {
       <div className="todo-list-header">
         <p className="todo-list-last-todo">
           남은 ToDo
-          <span>{localTodos.filter((todo) => !todo.checked).length}개</span>
+          <span>{todos.filter((todo) => !todo.checked).length}개</span>
         </p>
         <div className="todo-list-header-colors">
           {Object.keys(todoColorNums).map((color, idx) => (
@@ -237,7 +240,7 @@ const TodoList = ({ todos }: Props) => {
           ))}
         </div>
         <ul className="todo-list">
-          {localTodos.map((todo) => (
+          {todos.map((todo) => (
             <li className="todo-item" key={todo.id}>
               <div className="todo-left-side">
                 <div className={`todo-color-block bg-${todo.color}`} />

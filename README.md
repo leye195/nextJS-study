@@ -357,7 +357,7 @@ export default App;
 
 일반적으로 html 및 body 태그를 보강하는데 사용, document를 이용해 title, description, meta 등 프로젝트 정보를 제공하는 정보를 제공하는 html 코드를 작성 할 수 있으며 font or 외부 api, cdn등을 불러오도록 할 수 있음
 
-```
+```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
 
 class MyDocument extends Document {
@@ -395,33 +395,33 @@ next에서는 빌드된 프로덕션 환경에서 에러가 발생할 경우 에
 
 커스텀 404 페이지의 경우 `404.jsx` 파일을 만들어주면 됨
 
-```
+```jsx
 const NotFound = () => {
-  return <p>404 Not Found</p>
-}
+  return <p>404 Not Found</p>;
+};
 
 export default NotFound;
 ```
 
 **Styled Coponents SSR 지원 방법**
 
-```
+```jsx
 import Document from 'next/document';
 import {ServerStyleSheet} from 'styled-components';
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
     const sheet = new ServerStyleSheet();
-		const originalRenderPage = ctx.renderPage;
-
-		try {
+	  const originalRenderPage = ctx.renderPage;
+    try {
       ctx.renderPage = () =>
-				originalRenderPage({
-					enhanceApp: (App) => (props) =>
-						sheet.collectStyles(<App {...props}/>),
-				});
+	    originalRenderPage({
+        enhanceApp: (App) => (props) =>
+        sheet.collectStyles(<App {...props}/>),
+      });
       const initialProps = await Document.getInitialProps(ctx);
-			return {
+
+      return {
 				...initialProps,
 				styles: (
 					<>
@@ -457,4 +457,329 @@ export default MyDocument;
   "presets": ["next/babel"],
 	"plugins": [["styled-componnts", {"ssr": true}]]
 }
+```
+
+## Next API
+
+nextjs는 express 기반으로 만들어져있기 때문에 api를 만들고 사용할 수 있음
+
+`pages/api` 를 만들어 api 폴더 내부에 파일을 생성하여 작성을 하면 됨
+
+```jsx
+ex)
+
+import { NextApiRequest, NextApiResponse } from "next";
+
+export default (req: NextApiRequest, res: NextApiResponse) => {
+  return res.send("Next");
+};
+
+//or
+
+export default async(req:NextApiRequest, res: NextApiResponse) => {
+  try {
+    const todos = await new Promise<TodoType[]>((resolve,reject)=>{
+      fs.readFile('src/data/todos.json',(err,data) => {
+			  if(err) return reject(err.message);
+
+		    const todosData = data.toString();
+        if(!todosData) return resolve([]);
+
+        const todos = JSON.parse(todosData);
+				return resolve(todos);
+		  });
+		})
+
+		res.statusCode = 200;
+		return res.send(todos);
+  }catch(e) {
+    res.statusCode = 500;
+    res.send(e);
+  }
+
+  res.statusCode = 405;
+  return res.end();
+}
+
+```
+
+**환경변수 설정**
+
+root 경로에 .env.local 생성, nextjs에서는 기본적으로 `.env.local` 을 사용하여 불러온 환경변수에 대해서 브라우저에서는 노출되지 않고 서버에서만 노출되게 설정되어 있음.
+
+브라우저에서도 환경 변수가 노출되도록 하기 위해서는 변수명의 접두어로 NEXT*PUBLIC* 을 붙여줘야 된다.
+
+API_URL → NEXT_PUBLIC_API_URL
+
+**데이터 호출**
+
+```jsx
+ex)
+
+const index: NextPage<Props> = ({todos}) => {
+  const checkTodo = async(id:number) => {
+    try{
+      awati checkTodiAPI(id);
+      const newTodos = todos.map((todo)=>todo.id===id?({...todo,checked: !todo.checked}):todo);
+      setLocalTodos(newTodos);
+    }catch(e){
+      console.log(e);
+    }
+	}
+}
+
+export const getServerSideProps = async() => {
+  try {
+    const res = await getTodoAPI();
+
+		if(res.status === 200) return {props: {todos:res.data}};
+
+		return {
+		  props:{todos:[]}
+		};
+  } catch(e) {
+	  return { props:{todos:[]} };
+  }
+}
+
+export default index;
+
+```
+
+## NextJS with Redux
+
+nextJS에서 redux를 활용하기 위해서 next-redux-wrapper를 설치해줘야 됨
+
+```
+yarn add redux react-redux next-redux-wrapper redux-devtools-extension
+yarn add @types/react-redux -D
+```
+
+- [https://github.com/kirill-konshin/next-redux-wrapper/blob/a16c1d5a96e3fd8dcd9d375ae28b356d2e2f4b8c/packages/wrapper/src/index.tsx#L132](https://github.com/kirill-konshin/next-redux-wrapper/blob/a16c1d5a96e3fd8dcd9d375ae28b356d2e2f4b8c/packages/wrapper/src/index.tsx#L132) (참고)
+
+```jsx
+//store/index.ts
+
+import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { HYDRATE, createwrapper } from 'next-redux-wrapper';
+
+const rootReducer = combineReducers({
+
+});
+
+const reducer = (state: any, action: any) => {
+  it(action.type === HYDRATE) {
+    const newState = {
+			...state,
+			...action.payload
+    };
+		return newState;
+  }
+
+	return rootReducer(state,action);
+};
+
+export type RootState = ReturnType<typeof rootReducer>;
+
+const bindMiddlewares = (middleware: any) => {
+  if(process.env.NODE_ENV !== 'production') {
+    const { composeWithDevTools } = require('redux-devtools-extension');
+    return composeWithDevTools(applyMiddleware(...middleware));
+  }
+  return applyMiddleware(...middleware);
+}
+
+const initStore = () => createStore(reducer, bindMiddleware([]));
+
+export const wrapper = createWrapper(initStore);
+
+//pages/index.ts
+
+const App = () => {
+
+};
+
+export const getServerSideProps = wrapper.getServerSideProps((
+	{dispatch,getState}
+) => async() => {
+  const data = await getData();
+
+  return {props:{}};
+});
+
+```
+
+**Redux ToolKit**
+
+RTK는 Redux 앱을 만들기에 필수적이라고 생각되는 패키지와 함수들을 포함하고 있음.
+
+대부분의 작업을 단순화하고 , 흔한 실수를 방지하여 Redux 앱을 쉽게 만들수 있게 해주며
+
+아래 문제들을 해결해줌
+
+- 리덕스 저장소 구성 복잡
+- 리덕스가 유용한 작업을 수행할 수 있도록 많은 패키지 추가 필요
+- 리덕스 상용구 코드가 너무많이 필요
+
+```jsx
+yarn add @reduxjs/toolkit
+
+//적용 전 코드
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { TodoType } from "types/todo";
+
+const PREFIX = "todo";
+
+export const INIT_TODO_LIST = `${PREFIX}/INIT_TODO_LIST`;
+export const SET_TODO_LIST = `${PREFIX}/SET_TODO_LIST`;
+
+export const setToDo = (payload: TodoType[]) => {
+  return {
+    type: SET_TODO_LIST,
+    payload,
+  };
+};
+
+export const todoActions = { setToDo };
+
+interface ToDoReduxState {
+  todos: TodoType[];
+}
+
+const initialState: ToDoReduxState = {
+  todos: [],
+};
+
+export default function reducer(state = initialState, action: any) {
+  switch (action.type) {
+    case SET_TODO_LIST:
+      const newState = { ...state, todos: action.payload };
+      return newState;
+    default:
+      return state;
+  }
+}
+
+import {
+  createStore,
+  applyMiddleware,
+  combineReducers,
+} from "@reduxjs/toolkit";
+import { HYDRATE, createWrapper } from "next-redux-wrapper";
+import todo from "./todo";
+
+const rootReducer = combineReducers({
+  todo: todo.reducer,
+});
+
+const reducer = (state: any, action: any) => {
+  if (action.type === HYDRATE) {
+    const nextState = {
+      ...state,
+      ...action.payload,
+    };
+    if (state.count) nextState.count = state.count;
+    return nextState;
+  }
+  return rootReducer(state, action);
+};
+
+// store 타입
+export type RootState = ReturnType<typeof rootReducer>;
+
+// middleware 적용 store enhancer
+const bindMiddleware = (middleware: any) => {
+  if (process.env.NODE_ENV !== "production") {
+    const { composeWithDevTools } = require("redux-devtools-extension");
+    return composeWithDevTools(applyMiddleware(...middleware));
+  }
+  return applyMiddleware(...middleware);
+};
+
+const initStore = () => {
+  return createStore(reducer, bindMiddleware([]));
+};
+
+//app 컴포넌트에서 wrapper로 활용하기 위한 선언
+export const wrapper = createWrapper(initStore);
+
+-------------------------------------------------------------------------------
+
+//적용 후
+
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {TodoType} from 'types/todo';
+
+interface ToDoReduxState {
+  todos: TodoType[];
+};
+
+const initialState: ToDoReduxState = {
+  todos: [],
+};
+
+const todo = createSlice({
+  name: 'todo',
+  initialState,
+  reducers: {
+    setToDo(state,action: PayloadAction<TodoType[]>) {
+      state.todos = action.payload;
+    }
+  }
+});
+
+export const todoActions = {...todo.action};
+
+export default todo;
+
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { HYDRATE, createWrapper } from "next-redux-wrapper";
+import todo from "./todo";
+
+const rootReducer = combineReducers({
+  todo: todo.reducer,
+});
+
+const reducer = (state: any, action: any) => {
+  if (action.type === HYDRATE) {
+    const nextState = {
+      ...state,
+      ...action.payload,
+    };
+    if (state.count) nextState.count = state.count;
+    return nextState;
+  }
+  return rootReducer(state, action);
+};
+
+// store 타입
+export type RootState = ReturnType<typeof rootReducer>;
+
+const initStore = () => {
+  return configureStore({
+    reducer,
+    devTools: true,
+  });
+};
+
+//app 컴포넌트에서 wrapper로 활용하기 위한 선언
+export const wrapper = createWrapper(initStore);
+
+```
+
+**useSelector 타입 지원**
+
+useSelector를 홣용하기 위해서는 state를 RootState를 타입으로 지정해줘야 됨
+
+RootState를 매번 불러와서 state의 타입으로 지정해주는일은 매우 번거로운 일이기 때문에
+
+커스텀으로 타입을 지정해주면 매우 편하게 사용할 수 있음
+
+```jsx
+import {
+  TypedUseSelectorHook,
+  useSelecor as useReduxSelector,
+} from "react-redux";
+
+export const useSelector: TypedUseSelector<RootState> = useReduxSelector;
 ```

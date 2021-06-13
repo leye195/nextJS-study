@@ -233,7 +233,7 @@ const TodoList = ({ todos }: Props) => {
         </p>
         <div className="todo-list-header-colors">
           {Object.keys(todoColorNums).map((color, idx) => (
-            <div className="todo-list-header-color-num" key={idx}>
+            <div className="todo-list-header-color-num" key={color}>
               <div className={`todo-list-header-round-color bg-${color}`} />
               <p>{todoColorNums[color]}개</p>
             </div>

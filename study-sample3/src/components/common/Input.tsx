@@ -1,8 +1,15 @@
 import React from "react";
-import styled from "styled-components";
+import { useSelector } from "store";
+import styled, { css } from "styled-components";
 import palette from "../../styles/palette";
 
-const Container = styled.div<{ iconExist: boolean }>`
+type InputContainerProps = {
+  iconExist: boolean;
+  isValid: boolean;
+  useValidation: boolean;
+};
+
+const Container = styled.div<InputContainerProps>`
   input {
     position: relative;
     width: 100%;
@@ -22,6 +29,32 @@ const Container = styled.div<{ iconExist: boolean }>`
     }
   }
 
+  .input-error-message {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    font-size: 14px;
+    color: ${palette.tawny};
+  }
+
+  ${({ useValidation, isValid }) =>
+    useValidation &&
+    !isValid &&
+    css`
+      input {
+        background-color: ${palette.snow};
+        border-color: ${palette.orange};
+      }
+    `}
+
+  ${({ useValidation, isValid }) =>
+    useValidation &&
+    isValid &&
+    css`
+      input {
+        border-color: ${palette.daryCyan};
+      }
+    `}
+
   .input-icon-wrapper {
     display: flex;
     align-items: center;
@@ -33,13 +66,32 @@ const Container = styled.div<{ iconExist: boolean }>`
 `;
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: JSX.Element;
+  isValid?: boolean;
+  useValidation?: boolean;
+  validateMode?: boolean;
+  errorMessage?: string;
 }
 
-const Input: React.FC<Props> = ({ icon, ...props }) => {
+const Input: React.FC<Props> = ({
+  icon,
+  isValid = false,
+  useValidation = true,
+  errorMessage,
+  ...props
+}) => {
+  const validateMode = useSelector((state) => state.common.validateMode);
+
   return (
-    <Container iconExist={!!icon}>
+    <Container
+      iconExist={!!icon}
+      isValid={isValid}
+      useValidation={validateMode && useValidation}
+    >
       <input {...props} />
       <div className="input-icon-wrapper">{icon}</div>
+      {useValidation && validateMode && !isValid && errorMessage && (
+        <p className="input-error-message">{errorMessage}</p>
+      )}
     </Container>
   );
 };

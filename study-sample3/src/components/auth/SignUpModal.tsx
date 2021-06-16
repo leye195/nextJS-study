@@ -1,19 +1,23 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import palette from "styles/palette";
 import Input from "components/common/Input";
 import Selector from "components/common/Selector";
 import Button from "components/common/Button";
 import { monthList, dayList, yearList } from "lib/staticDate";
+import { signUpAPI } from "lib/api/auth";
+import { userActions } from "store/user";
+import useValidateMode from "hooks/useValidateMode";
 import CloseXIcon from "../../../public/static/svg/auth/modal_close_x_icon.svg";
 import MailIcon from "../../../public/static/svg/auth/mail.svg";
 import PersonIcon from "../../../public/static/svg/auth/person.svg";
 import OpenedEyeIcon from "../../../public/static/svg/auth/opened_eye.svg";
 import ClosedEyeIcon from "../../../public/static/svg/auth/closed_eye.svg";
 
-const Container = styled.div`
+const Container = styled.form`
   width: 565px;
-  height: 610px;
+  min-height: 610px;
   padding: 2rem;
   background-color: white;
   z-index: 11;
@@ -84,6 +88,10 @@ const SignUpModal: React.FC = () => {
   const [birthMonth, setBirthMonth] = useState<string | undefined>();
   const [birthDay, setBirthDay] = useState<string | undefined>();
 
+  const { setValidateMode } = useValidateMode();
+
+  const dispatch = useDispatch();
+
   const toggleHidePassword = () => {
     setHidePassword(!hidePassword);
   };
@@ -116,8 +124,35 @@ const SignUpModal: React.FC = () => {
     setBirthDay(e.target.value);
   };
 
+  const onSubmitSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setValidateMode(true);
+
+    if (!email || !lastName || !firstName || !password) {
+      return;
+    }
+
+    try {
+      const signUpBody = {
+        email,
+        firstName,
+        lastName,
+        password,
+        birthday: new Date(
+          `${birthYear}-${birthMonth!.replace("월", "")}-${birthDay}`,
+        ).toISOString(),
+      };
+      const { data } = await signUpAPI(signUpBody);
+
+      dispatch(userActions.setLoggedUser(data));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
-    <Container>
+    <Container onSubmit={onSubmitSignUp}>
       <CloseXIcon className="modal-close-x-icon" />
       <div className="input-wrapper">
         <Input
@@ -127,6 +162,9 @@ const SignUpModal: React.FC = () => {
           icon={<MailIcon />}
           value={email}
           onChange={onChangeEmail}
+          useValidation
+          isValid={!!email}
+          errorMessage="이메일이 필요합니다"
         />
       </div>
       <div className="input-wrapper">
@@ -137,6 +175,9 @@ const SignUpModal: React.FC = () => {
           icon={<PersonIcon />}
           value={lastName}
           onChange={onChangeLastName}
+          useValidation
+          isValid={!!lastName}
+          errorMessage="이름을 입력하세요"
         />
       </div>
       <div className="input-wrapper">
@@ -147,6 +188,9 @@ const SignUpModal: React.FC = () => {
           icon={<PersonIcon />}
           value={firstName}
           onChange={onChangeFirstName}
+          useValidation
+          isValid={!!firstName}
+          errorMessage="성을 입력하세요"
         />
       </div>
       <div className="input-wrapper sign-up-password-wrapper">
@@ -163,6 +207,9 @@ const SignUpModal: React.FC = () => {
           }
           value={password}
           onChange={onChangePassword}
+          useValidation
+          isValid={!!password}
+          errorMessage="비밀번호를 입력하세요"
         />
       </div>
       <p className="sign-up-birth-label">생일</p>

@@ -1,11 +1,15 @@
 import React from "react";
 import Link from "next/link";
 import styled from "styled-components";
-import SignUpModal from "./auth/SignUpModal";
-import palette from "../styles/palette";
-import useModal from "../hooks/useModal";
+import { useDispatch } from "react-redux";
+import { useSelector } from "store";
+import { authActions } from "store/auth";
+import AuthModal from "components/auth/AuthModal";
+import palette from "styles/palette";
+import useModal from "hooks/useModal";
 import LogoIcon from "../../public/static/svg/logo/logo.svg";
 import LogoTextIcon from "../../public/static/svg/logo/logo_text.svg";
+import HamburgerIcon from "../../public/static/svg/header/hamburger.svg";
 
 const Container = styled.div`
   display: flex;
@@ -60,10 +64,44 @@ const Container = styled.div`
       }
     }
   }
+
+  .header-user-profile {
+    display: flex;
+    align-items: center;
+    padding: 0 0.45rem 0 1rem;
+    height: 42px;
+    border: 0;
+    border-radius: 21px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    background-color: white;
+    outline: none;
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 2px 0.5rem rgba(0, 0, 0, 0.12);
+    }
+
+    .header-user-profile-image {
+      margin-left: 0.5rem;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+  }
 `;
 
 const Header: React.FC = () => {
-  const { ModalPortal, openModal } = useModal();
+  const dispatch = useDispatch();
+
+  const { ModalPortal, openModal, closeModal } = useModal();
+
+  const user = useSelector((state) => state.user);
+  const auth = useSelector((state) => state.auth);
+
+  const changeAuthModal = (mode: "signup" | "login") => () => {
+    dispatch(authActions.setAuthMode(mode));
+    openModal();
+  };
 
   return (
     <Container>
@@ -73,20 +111,37 @@ const Header: React.FC = () => {
           <LogoTextIcon />
         </a>
       </Link>
-      <div className="header-auth-buttons">
-        <button
-          className="header-signup-button"
-          type="button"
-          onClick={openModal}
-        >
-          회원가입
+      {!user.isLoggedIn && (
+        <div className="header-auth-buttons">
+          <button
+            className="header-signup-button"
+            type="button"
+            onClick={changeAuthModal("signup")}
+          >
+            회원가입
+          </button>
+          <button
+            className="header-login-button"
+            type="button"
+            onClick={changeAuthModal("login")}
+          >
+            로그인
+          </button>
+        </div>
+      )}
+      {user.isLoggedIn && (
+        <button className="header-user-profile" type="button">
+          <HamburgerIcon />
+          <img
+            className="header-user-profile-image"
+            src={user.profileImage}
+            alt=""
+          />
         </button>
-        <button className="header-login-button" type="button">
-          로그인
-        </button>
-      </div>
+      )}
+
       <ModalPortal>
-        <SignUpModal />
+        <AuthModal closeModal={closeModal} />
       </ModalPortal>
     </Container>
   );

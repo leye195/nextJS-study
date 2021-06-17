@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import palette from "styles/palette";
@@ -7,6 +7,8 @@ import Selector from "components/common/Selector";
 import Button from "components/common/Button";
 import { monthList, dayList, yearList } from "lib/staticDate";
 import { signUpAPI } from "lib/api/auth";
+import { useSelector } from "store";
+import { authActions } from "store/auth";
 import { userActions } from "store/user";
 import useValidateMode from "hooks/useValidateMode";
 import CloseXIcon from "../../../public/static/svg/auth/modal_close_x_icon.svg";
@@ -14,6 +16,7 @@ import MailIcon from "../../../public/static/svg/auth/mail.svg";
 import PersonIcon from "../../../public/static/svg/auth/person.svg";
 import OpenedEyeIcon from "../../../public/static/svg/auth/opened_eye.svg";
 import ClosedEyeIcon from "../../../public/static/svg/auth/closed_eye.svg";
+import PasswordWarning from "./PasswordWarning";
 
 const Container = styled.form`
   width: 565px;
@@ -76,9 +79,21 @@ const Container = styled.form`
     padding-bottom: 1rem;
     border-bottom: 1px solid ${palette.gray_eb};
   }
+
+  .sign-up-modal-set-login {
+    margin-left: 0.5rem;
+    color: ${palette.daryCyan};
+    cursor: pointer;
+  }
 `;
 
-const SignUpModal: React.FC = () => {
+const PASSWORD_MIN_LENGTH = 8;
+
+interface Props {
+  closeModal: () => void;
+}
+
+const SignUpModal: React.FC<Props> = ({ closeModal }) => {
   const [email, setEmail] = useState("");
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -87,6 +102,26 @@ const SignUpModal: React.FC = () => {
   const [birthYear, setBirthYear] = useState<string | undefined>();
   const [birthMonth, setBirthMonth] = useState<string | undefined>();
   const [birthDay, setBirthDay] = useState<string | undefined>();
+  const [passwordFocused, setPasswordFocused] = useState<boolean>(false);
+
+  const authMode = useSelector((state) => state.auth.authMode);
+
+  const isPassowordHasNameOrEmail = useMemo(
+    () =>
+      !password ||
+      !lastName ||
+      password.includes(lastName) ||
+      password.includes(email.split("@")[0]),
+    [password, lastName, email],
+  );
+  const isPasswordOverMinLength = useMemo(
+    () => !!password && password.length >= PASSWORD_MIN_LENGTH,
+    [password],
+  );
+  const isPasswordHasNumberOrSymbol = useMemo(
+    () => /[0-9]/g.test(password) || /[{}[\]/?.,;:|)*~`!^-_+<>@#$%&\\=('"]/g,
+    [password],
+  );
 
   const { setValidateMode } = useValidateMode();
 
@@ -94,6 +129,10 @@ const SignUpModal: React.FC = () => {
 
   const toggleHidePassword = () => {
     setHidePassword(!hidePassword);
+  };
+
+  const onFocusPassword = () => {
+    setPasswordFocused(true);
   };
 
   const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,6 +172,14 @@ const SignUpModal: React.FC = () => {
       return;
     }
 
+    if (
+      !isPasswordOverMinLength ||
+      isPassowordHasNameOrEmail ||
+      !isPasswordHasNumberOrSymbol
+    ) {
+      return;
+    }
+
     try {
       const signUpBody = {
         email,
@@ -146,14 +193,26 @@ const SignUpModal: React.FC = () => {
       const { data } = await signUpAPI(signUpBody);
 
       dispatch(userActions.setLoggedUser(data));
+
+      closeModal();
     } catch (err) {
       console.log(err);
     }
   };
 
+  const handleClickLogin = () => {
+    dispatch(authActions.setAuthMode("login"));
+  };
+
+  useEffect(() => {
+    return () => {
+      setValidateMode(false);
+    };
+  }, []);
+
   return (
     <Container onSubmit={onSubmitSignUp}>
-      <CloseXIcon className="modal-close-x-icon" />
+      <CloseXIcon className="modal-close-x-icon" onClick={closeModal} />
       <div className="input-wrapper">
         <Input
           type="email"
@@ -207,11 +266,30 @@ const SignUpModal: React.FC = () => {
           }
           value={password}
           onChange={onChangePassword}
+          onFocus={onFocusPassword}
           useValidation
-          isValid={!!password}
+          isValid={
+            isPassowordHasNameOrEmail &&
+            isPasswordHasNumberOrSymbol &&
+            isPasswordOverMinLength
+          }
           errorMessage="비밀번호를 입력하세요"
         />
       </div>
+      {passwordFocused && (
+        <>
+          <PasswordWarning
+            isValid={!isPassowordHasNameOrEmail}
+            text="비밀번호에 본인 이름이나 메일 주소를 포함 할 수 없습니다."
+          />
+          <PasswordWarning
+            isValid={!!isPasswordHasNumberOrSymbol}
+            text="숫자나 기호를 포함하세요."
+          />
+          <PasswordWarning isValid={isPasswordOverMinLength} text="최소 8자" />
+        </>
+      )}
+
       <p className="sign-up-birth-label">생일</p>
       <p className="sign-up-modal-birth-info">
         만 18세 이상의 성인만 회원으로 가입할 수 있습니다. 생일은 다른
@@ -225,6 +303,7 @@ const SignUpModal: React.FC = () => {
             defaultValue="월"
             value={birthMonth}
             onChange={onChangeBirthMonth}
+            isValid={!!birthMonth}
           />
         </div>
         <div className="sign-up-modal-birth-day-selector">
@@ -234,6 +313,7 @@ const SignUpModal: React.FC = () => {
             defaultValue="일"
             value={birthDay}
             onChange={onChangeBirthDay}
+            isValid={!!birthDay}
           />
         </div>
         <div className="sign-up-modal-birth-year-selector">
@@ -243,12 +323,23 @@ const SignUpModal: React.FC = () => {
             defaultValue="년"
             value={birthYear}
             onChange={onChangeBirthYear}
+            isValid={!!birthYear}
           />
         </div>
       </div>
       <div className="sign-up-modal-submit-button-wrapper">
         <Button type="submit">가입하기</Button>
       </div>
+      <p>
+        이미 에어비앤비 계정이 있으신가요?
+        <span
+          className="sign-up-modal-set-login"
+          role="presentation"
+          onClick={handleClickLogin}
+        >
+          로그인
+        </span>
+      </p>
     </Container>
   );
 };

@@ -6,8 +6,10 @@ import {
 } from "react-redux";
 import user from "./user";
 import common from "./common";
+import auth from "./auth";
 
 const rootReducer = combineReducers({
+  auth: auth.reducer,
   common: common.reducer,
   user: user.reducer,
 });

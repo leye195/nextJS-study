@@ -1,9 +1,12 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import Input from "components/common/Input";
 import Button from "components/common/Button";
 import { authActions } from "store/auth";
+import { userActions } from "store/user";
+import useValidateMode from "hooks/useValidateMode";
+import { loginAPI } from "lib/api/auth";
 import palette from "styles/palette";
 import CloseXIcon from "../../../public/static/svg/auth/modal_close_x_icon.svg";
 import MailIcon from "../../../public/static/svg/auth/mail.svg";
@@ -56,6 +59,8 @@ const LoginModal: React.FC<Props> = ({ closeModal }) => {
   const [password, setPassword] = useState("");
   const [isPasswordHided, setIsPasswordHided] = useState(true);
 
+  const { setValidateMode } = useValidateMode();
+
   const dispatch = useDispatch();
 
   const togglePasswordHiding = () => {
@@ -69,12 +74,36 @@ const LoginModal: React.FC<Props> = ({ closeModal }) => {
     setPassword(e.target.value);
   };
 
+  const onSubmitLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setValidateMode(true);
+
+    if (!email || !password) {
+      return;
+    }
+
+    try {
+      const { data } = await loginAPI({ email, password });
+
+      dispatch(userActions.setLoggedUser(data));
+      closeModal();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleClickSignUp = () => {
     dispatch(authActions.setAuthMode("signup"));
   };
 
+  useEffect(() => {
+    return () => {
+      setValidateMode(false);
+    };
+  }, []);
+
   return (
-    <Container>
+    <Container onSubmit={onSubmitLogin}>
       <CloseXIcon className="modal-close-x-icon" onClick={closeModal} />
       <div className="login-input-wrapper">
         <Input
@@ -85,6 +114,7 @@ const LoginModal: React.FC<Props> = ({ closeModal }) => {
           isValid={!!email}
           icon={<MailIcon />}
           onChange={onChangeEmail}
+          errorMessage="이메일이 필요합니다."
         />
       </div>
       <div className="login-input-wrapper login-password-input-wrapper">
@@ -102,6 +132,7 @@ const LoginModal: React.FC<Props> = ({ closeModal }) => {
             )
           }
           onChange={onChangePassword}
+          errorMessage="비밀번호를 입력하세요."
         />
       </div>
       <div className="login-modal-submit-button-wrapper">

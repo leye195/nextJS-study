@@ -69,4 +69,4 @@ const Selector: React.FC<Props> = ({
   );
 };
 
-export default Selector;
+export default React.memo(Selector);

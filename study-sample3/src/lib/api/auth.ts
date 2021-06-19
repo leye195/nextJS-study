@@ -21,3 +21,5 @@ export const loginAPI = (body: LoginAPIBody) =>
   api.post<UserType>("/api/auth/login", body);
 
 export const meAPI = () => api.get<UserType>("/api/auth/me");
+
+export const logoutAPI = () => api.delete("/api/auth/logout");

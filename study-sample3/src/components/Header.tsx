@@ -1,15 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import styled from "styled-components";
-import { useDispatch } from "react-redux";
 import { useSelector } from "store";
-import { authActions } from "store/auth";
-import AuthModal from "components/auth/AuthModal";
+import HeaderAuths from "components/HeaderAuths";
+import HeaderUserProfile from "components/HeaderUserProfile";
 import palette from "styles/palette";
-import useModal from "hooks/useModal";
 import LogoIcon from "../../public/static/svg/logo/logo.svg";
 import LogoTextIcon from "../../public/static/svg/logo/logo_text.svg";
-import HamburgerIcon from "../../public/static/svg/header/hamburger.svg";
 
 const Container = styled.div`
   display: flex;
@@ -30,6 +27,39 @@ const Container = styled.div`
 
     .header-logo {
       margin-right: 0.4rem;
+    }
+
+    & + div {
+      position: relative;
+    }
+  }
+
+  .header-usermenu {
+    width: 15rem;
+    position: absolute;
+    top: 3.5rem;
+    right: 0;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 1rem rgba(0, 0, 0, 0.15);
+
+    li {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      width: 100%;
+      height: 42px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: ${palette.gray_f7};
+      }
+    }
+
+    .header-menu-divider {
+      width: 100%;
+      height: 1px;
+      background-color: ${palette.gray_dd};
     }
   }
 
@@ -91,17 +121,7 @@ const Container = styled.div`
 `;
 
 const Header: React.FC = () => {
-  const dispatch = useDispatch();
-
-  const { ModalPortal, openModal, closeModal } = useModal();
-
-  const user = useSelector((state) => state.user);
-  const auth = useSelector((state) => state.auth);
-
-  const changeAuthModal = (mode: "signup" | "login") => () => {
-    dispatch(authActions.setAuthMode(mode));
-    openModal();
-  };
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
 
   return (
     <Container>
@@ -111,38 +131,8 @@ const Header: React.FC = () => {
           <LogoTextIcon />
         </a>
       </Link>
-      {!user.isLoggedIn && (
-        <div className="header-auth-buttons">
-          <button
-            className="header-signup-button"
-            type="button"
-            onClick={changeAuthModal("signup")}
-          >
-            회원가입
-          </button>
-          <button
-            className="header-login-button"
-            type="button"
-            onClick={changeAuthModal("login")}
-          >
-            로그인
-          </button>
-        </div>
-      )}
-      {user.isLoggedIn && (
-        <button className="header-user-profile" type="button">
-          <HamburgerIcon />
-          <img
-            className="header-user-profile-image"
-            src={user.profileImage}
-            alt=""
-          />
-        </button>
-      )}
-
-      <ModalPortal>
-        <AuthModal closeModal={closeModal} />
-      </ModalPortal>
+      {!isLoggedIn && <HeaderAuths />}
+      {isLoggedIn && <HeaderUserProfile />}
     </Container>
   );
 };

@@ -1,1 +1,1 @@
-[{"id":1,"email":"test@test.com","firstName":"test","lastName":"test","password":"$2a$08$Z7vl0UQBghZ.rNprmhDrQuuV08Rnde5HHdLb1Roi5pNfi5X7Syh/u","birthday":"2020-12-31T15:00:00.000Z","profileImage":"/static/image/user/default_user_profile_image.png"}]
+[{"id":1,"email":"test@test.com","firstName":"asd","lastName":"asd","password":"$2a$08$VJTpt1B5EZM0IGm2ZcIqBezYbvjxV7PT.VLI3zEeDiK0Imsc8BEVS","birthday":"2020-12-31T15:00:00.000Z","profileImage":"/static/image/user/default_user_profile_image.png"}]

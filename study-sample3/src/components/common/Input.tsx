@@ -96,4 +96,4 @@ const Input: React.FC<Props> = ({
   );
 };
 
-export default Input;
+export default React.memo(Input);

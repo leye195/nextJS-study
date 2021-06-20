@@ -7,3 +7,10 @@ export type CommonState = {
 export type UserState = UserType & {
   isLoggedIn: boolean;
 };
+
+export type RegisterRoomState = {
+  largeBuildingType: string | null;
+  buildingType: string | null;
+  roomType: string | null;
+  isSetUpForGuest: boolean | null;
+};

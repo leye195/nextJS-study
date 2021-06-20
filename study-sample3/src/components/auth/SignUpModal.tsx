@@ -5,7 +5,7 @@ import palette from "styles/palette";
 import Input from "components/common/Input";
 import Selector from "components/common/Selector";
 import Button from "components/common/Button";
-import { monthList, dayList, yearList } from "lib/staticDate";
+import { monthList, dayList, yearList } from "lib/staticData";
 import { signUpAPI } from "lib/api/auth";
 import { useSelector } from "store";
 import { authActions } from "store/auth";

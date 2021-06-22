@@ -18,7 +18,7 @@ interface Props extends React.SelectHTMLAttributes<HTMLSelectElement> {
   errorMessage?: string;
   useValidation?: boolean;
   isValid?: boolean;
-  type: "normal" | "register";
+  type?: "normal" | "register";
 }
 
 const normalSelectorStyle = css`
@@ -51,6 +51,7 @@ const RegisterSelectorStyle = css`
 
   label {
     position: relative;
+    margin-bottom: 0.5rem;
   }
 
   span {

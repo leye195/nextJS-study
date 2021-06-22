@@ -17,6 +17,10 @@ export const dayList = Array.from(Array(31), (_, i) => String(i + 1));
 
 export const yearList = Array.from(Array(121), (_, i) => String(2021 - i));
 
+export const bedroomCountList = Array.from(Array(16), (_, i) =>
+  String(`침실 ${i}개`),
+);
+
 /*
 숙소 큰 범위 건물 유형
 */

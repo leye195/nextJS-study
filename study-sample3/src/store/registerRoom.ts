@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RegisterRoomState } from "types/reduxState";
+import { BedType } from "types/room";
 
 const initialState: RegisterRoomState = {
   largeBuildingType: null,
@@ -65,6 +66,15 @@ const registerRoom = createSlice({
     setBedCount(state: any, actions: PayloadAction<number>) {
       state.bedCount = actions.payload;
       return state;
+    },
+    setBedTypeCount(
+      state: any,
+      actions: PayloadAction<{ id: number; type: BedType; count: number }>,
+    ) {
+      const { id, type, count } = actions.payload;
+
+      const bedRoom = state.bedList[id - 1];
+      const prevBeds = bedRoom.beds;
     },
   },
 });

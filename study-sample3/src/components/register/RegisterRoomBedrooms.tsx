@@ -9,6 +9,7 @@ import { useSelector } from "store";
 import { registerRoomActions } from "store/registerRoom";
 import styled from "styled-components";
 import Colors from "styles/color";
+import RegisterRoomBedTypes from "./RegisterRoomBedTypes";
 
 const Container = styled.div`
   padding: 3.8rem 1.8rem 6.2rem;
@@ -59,41 +60,6 @@ const Container = styled.div`
 
   .register-room-bed-type-list-wrapper {
     width: 100%;
-  }
-
-  .register-room-bedroom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 0;
-    width: 100%;
-    border-top: 1px solid ${Colors["grayDD" as string]};
-
-    &:last-child {
-      border-bottom: 1px sollid ${Colors["grayDD" as string]};
-    }
-  }
-
-  .register-room-bed-type-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .register-room-bed-type-bedroom-texts {
-    margin-bottom: 28px;
-  }
-
-  .register-room-bed-type-bedroom {
-    display: flex;
-    justift-content: center;
-    margin-bottom: 0.5rem;
-    font-size: 19px;
-    color: ${Colors["gray48" as string]};
-  }
-
-  .register-room-bed-type-bedroom-counts {
-    color: ${Colors["gray76" as string]};
   }
 `;
 
@@ -163,21 +129,7 @@ const RegisterRoomBedrooms = () => {
       </p>
       <div className="register-room-bed-type-list-wrapper">
         {bedList.map((bedRoom) => (
-          <div className="register-room-bedroom">
-            <div className="register-room-bed-type-top">
-              <div className="register-room-bed-type-bedroom-texts">
-                <p className="register-room-bed-type-bedroom">
-                  {bedRoom.id}번 침실
-                </p>
-                <div className="register-room-bed-type-bedroom-counts">
-                  침대 0개
-                </div>
-              </div>
-            </div>
-            <Button styleType="register" color="white">
-              침대 추가하기
-            </Button>
-          </div>
+          <RegisterRoomBedTypes bedRoom={bedRoom} />
         ))}
       </div>
     </Container>

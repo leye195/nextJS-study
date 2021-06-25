@@ -20,6 +20,10 @@ const globalStyle = css`
     text-decoration: none;
     color: ${palette.black_22};
   }
+
+  li {
+    list-style: none;
+  }
 `;
 
 const GlobalStyle = createGlobalStyle`

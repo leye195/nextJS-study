@@ -8,13 +8,7 @@ import { BedType } from "types/room";
 import { bedTypes } from "lib/staticData";
 import { useDispatch } from "react-redux";
 import { registerRoomActions } from "store/registerRoom";
-
-interface Props {
-  bedRoom: {
-    id: number;
-    beds: { type: BedType; count: number }[];
-  };
-}
+import { useSelector } from "store";
 
 const Container = styled.li`
   padding: 24px 0;
@@ -59,27 +53,30 @@ const Container = styled.li`
   }
 `;
 
-const RegisterRoomBedTypes: React.FC<Props> = ({ bedRoom }) => {
-  const initialBedOptions = bedRoom.beds.map((bed) => bed.type);
+const RegisterRoomPublicBedTypes: React.FC = () => {
   const [opened, setOpened] = useState(false);
-  const [activeBedOptions, setActiveBedOptions] =
-    useState<BedType[]>(initialBedOptions);
+
+  const publicBedList = useSelector(
+    (state) => state.registerRoom.publicBedList,
+  );
 
   const dispatch = useDispatch();
+  const initialBedOptions = () => publicBedList.map((bed) => bed.type);
+  const [activeBedOptions, setActiveBedOptions] = useState(initialBedOptions);
 
   const totalBedsCount = useMemo(() => {
-    const total = bedRoom.beds.reduce((n, bed) => n + bed.count, 0);
+    const total = publicBedList.reduce((n, bed) => n + bed.count, 0);
     return total;
-  }, [bedRoom]);
+  }, [publicBedList]);
 
   const bedTexts = useMemo(() => {
-    const texts = bedRoom.beds.map((bed) => `${bed.type} ${bed.count}개`);
+    const texts = publicBedList.map((bed) => `${bed.type} ${bed.count}개`);
     return texts.join(",");
-  }, [bedRoom]);
+  }, [publicBedList]);
 
   const lastBedOptions = useMemo(() => {
     return bedTypes.filter((type) => !activeBedOptions.includes(type));
-  }, [activeBedOptions, bedRoom]);
+  }, [activeBedOptions, publicBedList]);
 
   const toggleOpened = () => {
     setOpened((prev) => !prev);
@@ -90,13 +87,7 @@ const RegisterRoomBedTypes: React.FC<Props> = ({ bedRoom }) => {
   };
 
   const handleCounter = (type: BedType) => (value: number) => () => {
-    dispatch(
-      registerRoomActions.setBedTypeCount({
-        id: bedRoom.id,
-        type,
-        count: value,
-      }),
-    );
+    dispatch(registerRoomActions.setPublicBedTypeCount({ type, count: value }));
 
     if (value === 0) {
       setActiveBedOptions((options: BedType[]) =>
@@ -109,7 +100,7 @@ const RegisterRoomBedTypes: React.FC<Props> = ({ bedRoom }) => {
     <Container>
       <div className="register-room-bed-type-top">
         <div className="register-room-bed-type-bedroom-texts">
-          <p className="register-room-bed-type-bedroom">{bedRoom.id}번 침실</p>
+          <p className="register-room-bed-type-bedroom">공용 공간</p>
           <div className="register-room-bed-type-bedroom-counts">
             침대 {totalBedsCount}개 <br />
             {bedTexts}
@@ -130,7 +121,7 @@ const RegisterRoomBedTypes: React.FC<Props> = ({ bedRoom }) => {
                 minValue={0}
                 key={type}
                 value={
-                  bedRoom.beds.find((bed) => bed.type === type)?.count || 0
+                  publicBedList.find((bed) => bed.type === type)?.count || 0
                 }
                 increaseNum={1}
                 onChange={handleCounter(type)}
@@ -153,4 +144,4 @@ const RegisterRoomBedTypes: React.FC<Props> = ({ bedRoom }) => {
   );
 };
 
-export default RegisterRoomBedTypes;
+export default RegisterRoomPublicBedTypes;

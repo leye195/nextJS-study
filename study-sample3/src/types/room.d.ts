@@ -12,3 +12,5 @@ export type BedType =
   | "유아용 침대"
   | "해먹"
   | "물침대";
+
+export type BathRoomType = "private" | "public" | null;

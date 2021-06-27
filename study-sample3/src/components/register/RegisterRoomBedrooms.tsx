@@ -1,15 +1,16 @@
-import Button from "components/common/Button";
-import Counter from "components/common/Counter";
-import Selector from "components/common/Selector";
-import { bedroomCountList } from "lib/staticData";
-import { getNumber } from "lib/utils";
 import React, { ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
+import styled from "styled-components";
 import { useSelector } from "store";
 import { registerRoomActions } from "store/registerRoom";
-import styled from "styled-components";
+import Counter from "components/common/Counter";
+import Selector from "components/common/Selector";
+import RegisterRoomFooter from "components/register/RegisterRoomFooter";
+import RegisterRoomPublicBedTypes from "components/register/RegisterRoomPublicBedTypes";
+import RegisterRoomBedTypes from "components/register/RegisterRoomBedTypes";
+import { bedroomCountList } from "lib/staticData";
+import { getNumber } from "lib/utils";
 import Colors from "styles/color";
-import RegisterRoomBedTypes from "./RegisterRoomBedTypes";
 
 const Container = styled.div`
   padding: 3.8rem 1.8rem 6.2rem;
@@ -110,6 +111,7 @@ const RegisterRoomBedrooms = () => {
           value={`침실 ${bedroomCount}개`}
           options={bedroomCountList}
           onChange={onChangBedroomCount}
+          isValid={!!bedroomCount}
         />
       </div>
       <div className="register-room-bed-counter-wrapper">
@@ -129,9 +131,15 @@ const RegisterRoomBedrooms = () => {
       </p>
       <div className="register-room-bed-type-list-wrapper">
         {bedList.map((bedRoom) => (
-          <RegisterRoomBedTypes bedRoom={bedRoom} />
+          <RegisterRoomBedTypes key={bedRoom.id} bedRoom={bedRoom} />
         ))}
+        <RegisterRoomPublicBedTypes />
       </div>
+      <RegisterRoomFooter
+        prevHref="/room/register/building"
+        nextHref="/room/register/bathroom"
+        isValid={!!bedroomCount}
+      />
     </Container>
   );
 };

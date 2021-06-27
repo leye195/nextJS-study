@@ -1,5 +1,5 @@
 import { UserType } from "types/user";
-import { BedType } from "./room";
+import { BathRoomType, BedType } from "./room";
 
 export type CommonState = {
   validateMode: boolean;
@@ -19,4 +19,14 @@ export type RegisterRoomState = {
   bedCount: number;
   bedList: { id: number; beds: { type: BedType; count: number }[] }[];
   publicBedList: { type: BedType; count: number }[];
+  bathroomCount: number;
+  bathroomType: BathRoomType;
+  country: string;
+  city: string;
+  district: string;
+  streetAddress: string;
+  detailAddress: string;
+  postcode: string;
+  latitude: number;
+  longitude: number;
 };

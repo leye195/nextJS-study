@@ -172,3 +172,8 @@ export const bedTypes: BedType[] = [
   "해먹",
   "물침대",
 ];
+
+export const bathroomRadioList = [
+  { value: "private", label: "예" },
+  { value: "public", label: "아니요, 공용입니다." },
+];

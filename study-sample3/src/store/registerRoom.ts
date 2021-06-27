@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RegisterRoomState } from "types/reduxState";
-import { BedType } from "types/room";
+import { BathRoomType, BedType } from "types/room";
 
 const initialState: RegisterRoomState = {
   largeBuildingType: null,
@@ -12,6 +12,17 @@ const initialState: RegisterRoomState = {
   bedCount: 1,
   bedList: [],
   publicBedList: [],
+  bathroomCount: 1,
+  bathroomType: null,
+  // location
+  country: "",
+  city: "",
+  district: "",
+  streetAddress: "",
+  detailAddress: "",
+  postcode: "",
+  latitude: 0,
+  longitude: 0,
 };
 
 const registerRoom = createSlice({
@@ -31,21 +42,21 @@ const registerRoom = createSlice({
     },
     setRoomType(
       state: any,
-      actions: PayloadAction<"entire" | "public" | "private">,
+      action: PayloadAction<"entire" | "public" | "private">,
     ) {
-      state.roomType = actions.payload;
+      state.roomType = action.payload;
       return state;
     },
-    setIsSetUpForGuest(state: any, actions: PayloadAction<boolean>) {
-      state.isSetUpForGuest = actions.payload;
+    setIsSetUpForGuest(state: any, action: PayloadAction<boolean>) {
+      state.isSetUpForGuest = action.payload;
       return state;
     },
-    setMaximumGuestCount(state: any, actions: PayloadAction<number>) {
-      state.maximumGuestCount = actions.payload;
+    setMaximumGuestCount(state: any, action: PayloadAction<number>) {
+      state.maximumGuestCount = action.payload;
       return state;
     },
-    setBedroomCount(state: any, actions: PayloadAction<number>) {
-      const bedroomCount = actions.payload;
+    setBedroomCount(state: any, action: PayloadAction<number>) {
+      const bedroomCount = action.payload;
       let { bedList } = state;
 
       state.bedroomCount = bedroomCount;
@@ -63,18 +74,83 @@ const registerRoom = createSlice({
 
       return state;
     },
-    setBedCount(state: any, actions: PayloadAction<number>) {
-      state.bedCount = actions.payload;
+    setBedCount(state: any, action: PayloadAction<number>) {
+      state.bedCount = action.payload;
       return state;
     },
     setBedTypeCount(
       state: any,
-      actions: PayloadAction<{ id: number; type: BedType; count: number }>,
+      action: PayloadAction<{ id: number; type: BedType; count: number }>,
     ) {
-      const { id, type, count } = actions.payload;
-
+      const { id, type, count } = action.payload;
       const bedRoom = state.bedList[id - 1];
       const prevBeds = bedRoom.beds;
+      const index = prevBeds.findIndex((bed: any) => bed.type === type);
+
+      if (index === -1) {
+        state.bedList[id - 1].beds = [...prevBeds, { type, count }];
+        return state;
+      }
+
+      if (count === 0) {
+        state.bedList[id - 1].beds.splice(index, 1);
+      } else {
+        state.bedList[id - 1].beds[index].count = count;
+      }
+      return state;
+    },
+    setPublicBedTypeCount(
+      state: any,
+      action: PayloadAction<{ type: BedType; count: number }>,
+    ) {
+      const { type, count } = action.payload;
+      const index = state.publicBedList.findIndex(
+        (bed: any) => bed.type === type,
+      );
+
+      if (index === -1) {
+        state.publicBedList = [...state.publicBedList, { type, count }];
+        return state;
+      }
+
+      if (count === 0) {
+        state.publicBedList.splice(index, 1);
+      } else {
+        state.publicBedList[index].count = count;
+      }
+      return state;
+    },
+    setBathroomCount(state: any, action: PayloadAction<number>) {
+      state.bathroomCount = action.payload;
+      return state;
+    },
+    setBathroomType(state: any, action: PayloadAction<BathRoomType>) {
+      state.bathroomType = action.payload;
+      return state;
+    },
+    setCountry(state: any, action: PayloadAction<string>) {
+      state.country = action.payload;
+    },
+    setCity(state: any, action: PayloadAction<string>) {
+      state.city = action.payload;
+    },
+    setDistrict(state: any, action: PayloadAction<string>) {
+      state.district = action.payload;
+    },
+    setStreetAddress(state: any, action: PayloadAction<string>) {
+      state.streetAddress = action.payload;
+    },
+    setDetailAddress(state: any, action: PayloadAction<string>) {
+      state.detailAddress = action.payload;
+    },
+    setPostcode(state: any, action: PayloadAction<string>) {
+      state.postcode = action.payload;
+    },
+    setLatitude(state: any, action: PayloadAction<number>) {
+      state.latitude = action.payload;
+    },
+    setLongitude(state: any, action: PayloadAction<number>) {
+      state.longitude = action.payload;
     },
   },
 });

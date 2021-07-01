@@ -7,6 +7,7 @@ type InputContainerProps = {
   iconExist: boolean;
   isValid: boolean;
   useValidation: boolean;
+  label?: string;
 };
 
 const Container = styled.div<InputContainerProps>`
@@ -26,6 +27,13 @@ const Container = styled.div<InputContainerProps>`
 
     &:focus {
       border-color: ${palette.daryCyan};
+    }
+  }
+
+  label {
+    span {
+      display: block;
+      margin-bottom: 0.5rem;
     }
   }
 
@@ -70,6 +78,7 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   useValidation?: boolean;
   validateMode?: boolean;
   errorMessage?: string;
+  label?: string;
 }
 
 const Input: React.FC<Props> = ({
@@ -77,6 +86,7 @@ const Input: React.FC<Props> = ({
   isValid = false,
   useValidation = true,
   errorMessage,
+  label,
   ...props
 }) => {
   const validateMode = useSelector((state) => state.common.validateMode);
@@ -87,7 +97,13 @@ const Input: React.FC<Props> = ({
       isValid={isValid}
       useValidation={validateMode && useValidation}
     >
-      <input {...props} />
+      {label && (
+        <label>
+          <span>{label}</span>
+          <input {...props} />
+        </label>
+      )}
+      {!label && <input {...props} />}
       <div className="input-icon-wrapper">{icon}</div>
       {useValidation && validateMode && !isValid && errorMessage && (
         <p className="input-error-message">{errorMessage}</p>

@@ -18,11 +18,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const result = {
         latitude: lat,
         longitude: lng,
-        country: addressComponent[4].long_name,
-        city: addressComponent[3].long_name,
-        district: addressComponent[2].long_name,
-        streetAddress: `${addressComponent[1].long_name} ${addressComponent[0].long_name}`,
-        postcode: addressComponent[5].long_name,
+        country: addressComponent[5].long_name,
+        city: addressComponent[4].long_name,
+        district: addressComponent[3].long_name,
+        streetAddress: `${addressComponent[2].long_name} ${addressComponent[1].long_name} ${addressComponent[0].long_name}`,
+        postcode: addressComponent[6].long_name,
       };
 
       res.statusCode = 200;

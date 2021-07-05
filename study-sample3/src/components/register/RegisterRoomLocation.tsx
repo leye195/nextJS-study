@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import { useSelector } from "store";
@@ -84,6 +84,14 @@ const RegisterRoomLocation = () => {
   const longitude = useSelector((state) => state.registerRoom.longitude);
 
   const dispatch = useDispatch();
+
+  const isValid = useMemo(() => {
+    if (!country || !city || !streetAddress || !postCode || !district) {
+      return false;
+    }
+
+    return true;
+  }, [country, city, streetAddress, postCode, district]);
 
   const onSuccessGetLocation = async ({ coords }: { coords: any }) => {
     const { latitude, longitude } = coords;
@@ -173,14 +181,25 @@ const RegisterRoomLocation = () => {
         />
       </div>
       <div className="register-room-location-city-district">
-        <Input label="시/도" value={city} onChange={onChangeCity} />
-        <Input label="시/군/도" value={district} onChange={onChangeDistrict} />
+        <Input
+          label="시/도"
+          value={city}
+          onChange={onChangeCity}
+          isValid={!!city}
+        />
+        <Input
+          label="시/군/도"
+          value={district}
+          onChange={onChangeDistrict}
+          isValid={!!district}
+        />
       </div>
       <div className="register-room-location-street-address">
         <Input
           label="도로명주소"
           value={streetAddress}
           onChange={onChangeStreetAddress}
+          isValid={!!streetAddress}
         />
       </div>
       <div className="register-room-location-detail-address">
@@ -188,18 +207,35 @@ const RegisterRoomLocation = () => {
           label="동호수(선택 사항)"
           value={detailAddress}
           onChange={onChangeDetailAddress}
+          isValid
         />
       </div>
       <div className="register-room-location-post-code">
-        <Input label="우편번호" value={postCode} onChange={onChangePostCode} />
+        <Input
+          label="우편번호"
+          value={postCode}
+          onChange={onChangePostCode}
+          isValid={!!postCode}
+        />
       </div>
       <div className="register-room-location-lng-lat">
-        <Input label="위도" value={latitude} onChange={() => {}} />
-        <Input label="경도" value={longitude} onChange={() => {}} />
+        <Input
+          label="위도"
+          value={latitude}
+          onChange={() => {}}
+          isValid={!!latitude}
+        />
+        <Input
+          label="경도"
+          value={longitude}
+          onChange={() => {}}
+          isValid={!!longitude}
+        />
       </div>
       <RegisterRoomFooter
         prevHref="/room/register/bathroom"
         nextHref="/room/register/geometry"
+        isValid={isValid}
       />
     </Container>
   );

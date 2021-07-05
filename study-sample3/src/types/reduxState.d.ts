@@ -29,4 +29,5 @@ export type RegisterRoomState = {
   postcode: string;
   latitude: number;
   longitude: number;
+  amentities: string[];
 };

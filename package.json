@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@types/googlemaps": "^3.43.3"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.170",
+    "lodash": "^4.17.21"
+  }
+}

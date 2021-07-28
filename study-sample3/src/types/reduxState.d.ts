@@ -30,4 +30,6 @@ export type RegisterRoomState = {
   latitude: number;
   longitude: number;
   amentities: string[];
+  conveniences: string[];
+  photos: string[];
 };

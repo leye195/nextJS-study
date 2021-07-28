@@ -1,11 +1,11 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import CheckboxGroup from "components/common/CheckboxGroup";
-import { amentityList } from "lib/staticData";
-import Colors from "styles/color";
 import { useSelector } from "store";
 import { registerRoomActions } from "store/registerRoom";
+import CheckboxGroup from "components/common/CheckboxGroup";
+import Colors from "styles/color";
+import { convenienceList } from "lib/staticData";
 import RegisterRoomFooter from "./RegisterRoomFooter";
 
 const Container = styled.div`
@@ -38,37 +38,34 @@ const Container = styled.div`
   }
 `;
 
-const RegisterRoomAmentities = () => {
+const RegisterRoomConveniences = () => {
   const dispatch = useDispatch();
-
-  const amentities = useSelector((state) => state.registerRoom.amentities);
-
-  const onChangeAmentities = (selected: string[]) => {
-    dispatch(registerRoomActions.setAmentities(selected));
+  const conveniences = useSelector((state) => state.registerRoom.conveniences);
+  const onChangeConveniences = (selected: string[]) => {
+    dispatch(registerRoomActions.setConveniences(selected));
   };
 
   return (
     <Container>
-      <h2>어떤 편의시설을 제공하시나요?</h2>
-      <h3>5단계</h3>
+      <h2>게스트가 어떤 공간을 사용할 수 있나요?</h2>
+      <h3>6단계</h3>
       <div className="register-room-step-info">
-        일반적으로 게스트가 기대하는 편의시설 목록입니다. 숙소를 등록한 후
-        언제든 편의시설을 추가할 수 있어요.
+        등록하고자 하는 숙소에서 게스트가 이용 가능한 공용 공간을 선택하세요.
       </div>
-      <div className="register-room-amentities-checkbox-group-wrapper">
+      <div className="register-room-conveniences-checkbox-group-wrapper">
         <CheckboxGroup
-          value={amentities}
-          options={amentityList}
-          onChange={onChangeAmentities}
+          value={conveniences}
+          onChange={onChangeConveniences}
+          options={convenienceList}
         />
       </div>
       <RegisterRoomFooter
-        prevHref="/room/register/location"
-        nextHref="/room/register/conveniences"
+        prevHref="/room/register/amentities"
+        nextHref="/room/register/photo"
         isValid
       />
     </Container>
   );
 };
 
-export default RegisterRoomAmentities;
+export default RegisterRoomConveniences;
